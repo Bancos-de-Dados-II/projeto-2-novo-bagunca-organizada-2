@@ -4,9 +4,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
-import pontoRoutes from './routes/routes.js';
-import { conectarMongoDB } from './database/mongodb.js';
-import { conectarPostgres } from './database/postgres.js';
+import pontoRoutes from './routes/routes';
+import { conectarMongoDB } from './database/mongodb';
+import { conectarPostgres } from './database/postgres';
 
 dotenv.config();
 
