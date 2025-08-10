@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx watch backend/index.ts"
+    "dev": "npx tsx watch backend/index.ts",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
