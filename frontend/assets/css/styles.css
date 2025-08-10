@@ -1,0 +1,268 @@
+/* Estilos customizados para o Sistema de Pontos Georreferenciados */
+
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+}
+
+/* Layout geral */
+body {
+    background-color: var(--light-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navbar customizada */
+.navbar-brand {
+    font-weight: 600;
+}
+
+/* Cards */
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    font-weight: 600;
+}
+
+/* Lista de pontos */
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 1rem;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.list-group-item:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.list-group-item.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.ponto-item {
+    cursor: pointer;
+}
+
+.ponto-item h6 {
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+}
+
+.ponto-item .badge {
+    font-size: 0.75rem;
+}
+
+.ponto-item small {
+    color: var(--secondary-color);
+}
+
+.ponto-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.ponto-actions .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Mapa */
+#mapa, #miniMapa {
+    border-radius: 0.375rem;
+}
+
+.leaflet-container {
+    font-family: inherit;
+}
+
+.leaflet-popup-content {
+    font-family: inherit;
+}
+
+.popup-content h6 {
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.popup-content .badge {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.popup-content p {
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.popup-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.25rem;
+}
+
+.popup-actions .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Modal customizado */
+.modal-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+/* Formulário */
+.form-label {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: rgba(13, 110, 253, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.is-invalid {
+    border-color: var(--danger-color);
+}
+
+.invalid-feedback {
+    display: block;
+}
+
+/* Alertas customizados */
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+}
+
+.alert-dismissible .btn-close {
+    padding: 0.75rem 1rem;
+}
+
+/* Botões */
+.btn {
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-sm {
+    font-size: 0.875rem;
+}
+
+/* Loading spinner */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    .row {
+        margin-left: -0.375rem;
+        margin-right: -0.375rem;
+    }
+    
+    .col-md-4,
+    .col-md-8 {
+        padding-left: 0.375rem;
+        padding-right: 0.375rem;
+    }
+    
+    #mapa,
+    #miniMapa {
+        height: 400px !important;
+    }
+    
+    .modal-lg {
+        max-width: 95%;
+    }
+    
+    .ponto-actions {
+        flex-direction: column;
+    }
+    
+    .navbar-brand {
+        font-size: 1rem;
+    }
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Ícones de tipo de ponto */
+.tipo-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    font-size: 0.75rem;
+}
+
+.tipo-restaurante { background-color: #ff6b6b; color: white; }
+.tipo-hospital { background-color: #ff4757; color: white; }
+.tipo-escola { background-color: #3742fa; color: white; }
+.tipo-posto { background-color: #ffa502; color: white; }
+.tipo-banco { background-color: #2ed573; color: white; }
+.tipo-farmacia { background-color: #1e90ff; color: white; }
+.tipo-supermercado { background-color: #ff6348; color: white; }
+.tipo-outro { background-color: var(--secondary-color); color: white; }
+
+/* Scrollbar customizada */
+.list-group::-webkit-scrollbar {
+    width: 6px;
+}
+
+.list-group::-webkit-scrollbar-track {
+    background: var(--light-color);
+}
+
+.list-group::-webkit-scrollbar-thumb {
+    background: var(--secondary-color);
+    border-radius: 3px;
+}
+
+.list-group::-webkit-scrollbar-thumb:hover {
+    background: var(--dark-color);
+}
