@@ -51,5 +51,24 @@ const PontoSchema = new Schema<IPonto>({
   timestamps: true, // Adiciona campos createdAt e updatedAt automaticamente
 });
 
+// Índice geoespacial para consultas de localização
+PontoSchema.index({ localizacao: '2dsphere' });
+
+// Índice de texto completo para busca textual
+PontoSchema.index({ 
+  nome: 'text', 
+  tipo: 'text', 
+  descricao: 'text', 
+  endereco: 'text' 
+}, {
+  weights: {
+    nome: 10,      // Nome tem peso maior
+    tipo: 5,       // Tipo tem peso médio
+    endereco: 3,   // Endereço tem peso médio-baixo
+    descricao: 1   // Descrição tem peso menor
+  },
+  name: 'texto_completo'
+});
+
 const Ponto = model<IPonto>('Ponto', PontoSchema);
 export default Ponto;

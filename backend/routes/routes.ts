@@ -6,6 +6,8 @@ import listarPontos from '../controllers/listarPontos';
 import buscarPonto from '../controllers/buscarPonto';
 import atualizarPonto from '../controllers/atualizarPonto';
 import deletarPonto from '../controllers/deletarPonto';
+import buscarTexto from '../controllers/buscarTexto';
+import obterEstatisticas from '../controllers/estatisticas';
 
 const router = Router();
 
@@ -18,5 +20,9 @@ router.get('/pontos/:id', buscarPonto);
 router.put('/pontos/:id', atualizarPonto);
 
 router.delete('/pontos/:id', deletarPonto);
+
+router.get('/buscar', buscarTexto);
+
+router.get('/estatisticas', obterEstatisticas);
 
 export default router;

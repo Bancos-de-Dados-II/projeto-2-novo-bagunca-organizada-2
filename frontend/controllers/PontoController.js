@@ -32,6 +32,8 @@ class PontoController {
         // Botões principais
         document.getElementById('btnNovoPonto').addEventListener('click', () => this.abrirModalNovoPonto());
         document.getElementById('btnAtualizarLista').addEventListener('click', () => this.carregarPontos());
+        document.getElementById('btnDashboard').addEventListener('click', () => this.abrirDashboard());
+        document.getElementById('btnAtualizarDashboard').addEventListener('click', () => this.atualizarDashboard());
 
         // Formulário
         document.getElementById('formPonto').addEventListener('submit', (e) => this.salvarPonto(e));
@@ -55,17 +57,39 @@ class PontoController {
         // Inputs de coordenadas
         document.getElementById('inputLatitude').addEventListener('input', () => this.atualizarMiniMapa());
         document.getElementById('inputLongitude').addEventListener('input', () => this.atualizarMiniMapa());
+
+        // Busca de endereço
+        document.getElementById('btnBuscarEndereco').addEventListener('click', () => this.buscarEndereco());
+        document.getElementById('inputEndereco').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.buscarEndereco();
+            }
+        });
+
+        // Busca textual
+        document.getElementById('btnBuscar').addEventListener('click', () => this.buscarPontos());
+        document.getElementById('btnLimparBusca').addEventListener('click', () => this.limparBusca());
+        document.getElementById('inputBusca').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.buscarPontos();
+            }
+        });
     }
 
     /**
      * Inicializa os mapas
      */
     initMapa() {
-        // Mapa principal
-        this.mapa = L.map('mapa').setView([-15.7801, -47.9292], 4); // Centro do Brasil
+        // Mapa principal - inicia no centro do Brasil
+        this.mapa = L.map('mapa').setView([-15.7801, -47.9292], 4);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(this.mapa);
+
+        // Tenta obter localização do usuário
+        this.obterLocalizacaoUsuario();
 
         // Mini mapa do modal
         this.miniMapa = L.map('miniMapa').setView([-15.7801, -47.9292], 10);
@@ -79,6 +103,160 @@ class PontoController {
             document.getElementById('inputLongitude').value = e.latlng.lng.toFixed(6);
             this.atualizarMiniMapa();
         });
+    }
+
+    /**
+     * Obtém localização do usuário e centraliza o mapa
+     */
+    obterLocalizacaoUsuario() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    // Centraliza o mapa na localização do usuário
+                    this.mapa.setView([lat, lng], 13);
+                    
+                    // Adiciona marker da localização atual
+                    const userIcon = L.divIcon({
+                        html: '<i class="fas fa-user-circle text-primary" style="font-size: 24px;"></i>',
+                        iconSize: [24, 24],
+                        className: 'user-location-marker'
+                    });
+                    
+                    L.marker([lat, lng], { icon: userIcon })
+                        .addTo(this.mapa)
+                        .bindPopup('<b>Sua localização atual</b>')
+                        .openPopup();
+                        
+                    console.log('✅ Localização do usuário obtida:', lat, lng);
+                },
+                (error) => {
+                    console.warn('⚠️ Não foi possível obter localização:', error.message);
+                    // Mantém o centro padrão do Brasil
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 600000 // 10 minutos
+                }
+            );
+        } else {
+            console.warn('⚠️ Geolocalização não suportada pelo navegador');
+        }
+    }
+
+    /**
+     * Busca endereços usando Nominatim (OpenStreetMap)
+     */
+    async buscarEndereco() {
+        const endereco = document.getElementById('inputEndereco').value.trim();
+        if (!endereco) {
+            this.showAlert('Digite um endereço para buscar', 'warning');
+            return;
+        }
+
+        const resultadosContainer = document.getElementById('resultadosBusca');
+        
+        try {
+            // Mostra loading
+            resultadosContainer.innerHTML = '<div class="dropdown-item text-center"><i class="fas fa-spinner fa-spin"></i> Buscando...</div>';
+            resultadosContainer.style.display = 'block';
+
+            // Consulta Nominatim
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}&limit=5&addressdetails=1&countrycodes=br`);
+            const resultados = await response.json();
+
+            if (resultados.length === 0) {
+                resultadosContainer.innerHTML = '<div class="dropdown-item text-muted">Nenhum resultado encontrado</div>';
+                return;
+            }
+
+            // Renderiza resultados
+            resultadosContainer.innerHTML = resultados.map(resultado => `
+                <button type="button" class="dropdown-item endereco-resultado" 
+                        data-lat="${resultado.lat}" 
+                        data-lng="${resultado.lon}"
+                        data-endereco="${resultado.display_name}">
+                    <div>
+                        <strong>${resultado.display_name.split(',')[0]}</strong>
+                        <br>
+                        <small class="text-muted">${resultado.display_name}</small>
+                    </div>
+                </button>
+            `).join('');
+
+            // Adiciona event listeners aos resultados
+            resultadosContainer.querySelectorAll('.endereco-resultado').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const lat = parseFloat(btn.dataset.lat);
+                    const lng = parseFloat(btn.dataset.lng);
+                    const enderecoCompleto = btn.dataset.endereco;
+
+                    // Atualiza campos
+                    document.getElementById('inputLatitude').value = lat.toFixed(6);
+                    document.getElementById('inputLongitude').value = lng.toFixed(6);
+                    document.getElementById('inputEndereco').value = enderecoCompleto;
+
+                    // Atualiza mini mapa
+                    this.atualizarMiniMapa();
+
+                    // Esconde resultados
+                    resultadosContainer.style.display = 'none';
+                });
+            });
+
+        } catch (error) {
+            console.error('Erro ao buscar endereço:', error);
+            resultadosContainer.innerHTML = '<div class="dropdown-item text-danger">Erro ao buscar endereço</div>';
+        }
+    }
+
+    /**
+     * Busca pontos usando full-text search
+     */
+    async buscarPontos() {
+        const query = document.getElementById('inputBusca').value.trim();
+        
+        if (!query) {
+            // Se não há query, carrega todos os pontos
+            await this.carregarPontos();
+            return;
+        }
+
+        try {
+            this.showLoading(true);
+            
+            const response = await fetch(`/api/buscar?q=${encodeURIComponent(query)}`);
+            const resultado = await response.json();
+            
+            if (!resultado.success) {
+                throw new Error(resultado.message);
+            }
+
+            this.pontos = resultado.data.map(pontoData => new Ponto(pontoData));
+            this.renderizarListaPontos();
+            this.renderizarMarkers();
+            
+            document.getElementById('btnLimparBusca').style.display = 'inline-block';
+            this.showAlert(`${resultado.total} ponto(s) encontrado(s) para "${query}"`, 'success');
+            
+        } catch (error) {
+            console.error('Erro ao buscar pontos:', error);
+            this.showAlert('Erro ao buscar pontos: ' + error.message, 'danger');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    /**
+     * Limpa busca e recarrega todos os pontos
+     */
+    async limparBusca() {
+        document.getElementById('inputBusca').value = '';
+        document.getElementById('btnLimparBusca').style.display = 'none';
+        await this.carregarPontos();
     }
 
     /**
@@ -444,6 +622,156 @@ class PontoController {
         };
 
         return `<i class="${icons[tipo] || icons['Outro']}"></i>`;
+    }
+
+    /**
+     * Abre modal do dashboard
+     */
+    async abrirDashboard() {
+        const modal = new bootstrap.Modal(document.getElementById('modalDashboard'));
+        modal.show();
+        await this.atualizarDashboard();
+    }
+
+    /**
+     * Atualiza dados do dashboard
+     */
+    async atualizarDashboard() {
+        try {
+            const response = await fetch('/api/estatisticas');
+            const resultado = await response.json();
+
+            if (!resultado.success) {
+                throw new Error(resultado.message);
+            }
+
+            const { pontosPorTipo, pontosPorMes, distribuicaoGeografica, totalPontos, pontosRecentes } = resultado.data;
+
+            // Atualiza cards de estatísticas
+            document.getElementById('totalPontos').textContent = totalPontos;
+            document.getElementById('tipoMaisComum').textContent = pontosPorTipo[0]?.total ? `${pontosPorTipo[0]._id} (${pontosPorTipo[0].total})` : 'N/A';
+            document.getElementById('regiaoMaior').textContent = distribuicaoGeografica[0]?.total ? `${distribuicaoGeografica[0]._id} (${distribuicaoGeografica[0].total})` : 'N/A';
+            
+            // Crescimento do mês atual
+            const mesAtual = new Date().getMonth() + 1;
+            const anoAtual = new Date().getFullYear();
+            const crescimentoMesAtual = pontosPorMes.find(item => item._id.mes === mesAtual && item._id.ano === anoAtual);
+            document.getElementById('crescimentoMes').textContent = crescimentoMesAtual?.total || 0;
+
+            // Renderiza gráficos
+            this.renderizarGraficos(pontosPorTipo, distribuicaoGeografica, pontosPorMes);
+
+            // Renderiza pontos recentes
+            this.renderizarPontosRecentes(pontosRecentes);
+
+        } catch (error) {
+            console.error('Erro ao carregar dashboard:', error);
+            this.showAlert('Erro ao carregar dashboard: ' + error.message, 'danger');
+        }
+    }
+
+    /**
+     * Renderiza os gráficos do dashboard
+     */
+    renderizarGraficos(pontosPorTipo, distribuicaoGeografica, pontosPorMes) {
+        // Gráfico por tipo (Pizza)
+        const ctxTipo = document.getElementById('graficoPorTipo').getContext('2d');
+        new Chart(ctxTipo, {
+            type: 'doughnut',
+            data: {
+                labels: pontosPorTipo.map(item => item._id),
+                datasets: [{
+                    data: pontosPorTipo.map(item => item.total),
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Gráfico geográfico (Barras)
+        const ctxGeo = document.getElementById('graficoGeografico').getContext('2d');
+        new Chart(ctxGeo, {
+            type: 'bar',
+            data: {
+                labels: distribuicaoGeografica.map(item => item._id),
+                datasets: [{
+                    label: 'Pontos por Região',
+                    data: distribuicaoGeografica.map(item => item.total),
+                    backgroundColor: '#36A2EB'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Gráfico de crescimento (Linha)
+        const ctxCrescimento = document.getElementById('graficoCrescimento').getContext('2d');
+        const mesesOrdenados = pontosPorMes.reverse(); // Do mais antigo para o mais recente
+        
+        new Chart(ctxCrescimento, {
+            type: 'line',
+            data: {
+                labels: mesesOrdenados.map(item => `${item._id.mes}/${item._id.ano}`),
+                datasets: [{
+                    label: 'Pontos Cadastrados',
+                    data: mesesOrdenados.map(item => item.total),
+                    borderColor: '#4BC0C0',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Renderiza lista de pontos recentes
+     */
+    renderizarPontosRecentes(pontosRecentes) {
+        const container = document.getElementById('pontosRecentes');
+        
+        if (pontosRecentes.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted p-3">Nenhum ponto cadastrado ainda</div>';
+            return;
+        }
+
+        container.innerHTML = pontosRecentes.map(ponto => `
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1">${ponto.nome}</h6>
+                        <span class="badge bg-primary">${ponto.tipo}</span>
+                    </div>
+                    <small class="text-muted">${new Date(ponto.createdAt).toLocaleDateString('pt-BR')}</small>
+                </div>
+            </div>
+        `).join('');
     }
 }
 

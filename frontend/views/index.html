@@ -26,10 +26,16 @@
                     <i class="fas fa-map-marker-alt me-2"></i>
                     Sistema de Pontos Georreferenciados
                 </span>
-                <button class="btn btn-outline-light" id="btnNovoPonto">
-                    <i class="fas fa-plus me-1"></i>
-                    Novo Ponto
-                </button>
+                <div>
+                    <button class="btn btn-outline-light me-2" id="btnDashboard">
+                        <i class="fas fa-chart-bar me-1"></i>
+                        Dashboard
+                    </button>
+                    <button class="btn btn-outline-light" id="btnNovoPonto">
+                        <i class="fas fa-plus me-1"></i>
+                        Novo Ponto
+                    </button>
+                </div>
             </div>
         </nav>
 
@@ -41,14 +47,25 @@
             <!-- Sidebar com lista de pontos -->
             <div class="col-md-4">
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-list me-2"></i>
-                            Pontos Cadastrados
-                        </h5>
-                        <button class="btn btn-sm btn-outline-primary" id="btnAtualizarLista">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list me-2"></i>
+                                Pontos Cadastrados
+                            </h5>
+                            <button class="btn btn-sm btn-outline-primary" id="btnAtualizarLista">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control" id="inputBusca" placeholder="Buscar pontos...">
+                            <button class="btn btn-outline-secondary" type="button" id="btnBuscar">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary" type="button" id="btnLimparBusca" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body p-0">
                         <!-- Loading spinner -->
@@ -126,7 +143,13 @@
                                 
                                 <div class="mb-3">
                                     <label for="inputEndereco" class="form-label">Endereço</label>
-                                    <input type="text" class="form-control" id="inputEndereco">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="inputEndereco" placeholder="Digite um endereço para buscar">
+                                        <button class="btn btn-outline-secondary" type="button" id="btnBuscarEndereco">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                    <div id="resultadosBusca" class="dropdown-menu w-100" style="max-height: 200px; overflow-y: auto;"></div>
                                 </div>
                             </div>
                             
@@ -203,7 +226,123 @@
         </div>
     </div>
 
+    <!-- Modal Dashboard -->
+    <div class="modal fade" id="modalDashboard" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Dashboard - Análise de Dados
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Estatísticas gerais -->
+                        <div class="col-12 mb-4">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="card bg-primary text-white">
+                                        <div class="card-body text-center">
+                                            <h3 id="totalPontos">-</h3>
+                                            <p class="mb-0">Total de Pontos</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-success text-white">
+                                        <div class="card-body text-center">
+                                            <h3 id="tipoMaisComum">-</h3>
+                                            <p class="mb-0">Tipo Mais Comum</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-info text-white">
+                                        <div class="card-body text-center">
+                                            <h3 id="regiaoMaior">-</h3>
+                                            <p class="mb-0">Região com Mais Pontos</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-warning text-white">
+                                        <div class="card-body text-center">
+                                            <h3 id="crescimentoMes">-</h3>
+                                            <p class="mb-0">Novos Este Mês</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gráficos -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Distribuição por Tipo</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="graficoPorTipo" width="400" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Distribuição Geográfica</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="graficoGeografico" width="400" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Crescimento ao Longo do Tempo</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="graficoCrescimento" width="800" height="400"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pontos recentes -->
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Pontos Mais Recentes</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="pontosRecentes" class="list-group list-group-flush">
+                                        <!-- Será preenchido dinamicamente -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Fechar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnAtualizarDashboard">
+                        <i class="fas fa-sync-alt me-1"></i>
+                        Atualizar Dados
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
