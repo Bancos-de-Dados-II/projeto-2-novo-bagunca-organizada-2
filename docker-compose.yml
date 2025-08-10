@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Serviço do MongoDB
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_container
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: always
+  
+  # Serviço do PostgreSQL com PostGIS
+  postgres:
+    image: postgis/postgis:latest
+    container_name: postgres_container
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    restart: always
+
+  # Serviço do pgAdmin4
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin_container
+    ports:
+      - "15432:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=pedrocasa808080@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    restart: always
+
+volumes:
+  mongodb_data:
+  postgres_data:
+  pgadmin_data:
