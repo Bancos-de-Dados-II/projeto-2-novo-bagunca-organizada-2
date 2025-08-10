@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-        "dev": "tsx watch backend/index.ts"
+    "dev": "tsx watch backend/index.ts"
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,14 @@
   },
   "homepage": "https://github.com/Bancos-de-Dados-II/projeto-2-novo-bagunca-organizada-2#readme",
   "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@types/node": "^24.2.1",
+    "tsx": "^4.20.3",
     "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "mongoose": "^8.17.1",
+    "neo4j-driver": "^5.28.1"
   }
 }
