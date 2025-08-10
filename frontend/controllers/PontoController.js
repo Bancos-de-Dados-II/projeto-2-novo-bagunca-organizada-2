@@ -12,7 +12,7 @@ class PontoController {
         this.miniMapa = null;
         this.markers = new Map();
         this.editando = false;
-        
+
         this.init();
     }
 
@@ -32,16 +32,26 @@ class PontoController {
         // Botões principais
         document.getElementById('btnNovoPonto').addEventListener('click', () => this.abrirModalNovoPonto());
         document.getElementById('btnAtualizarLista').addEventListener('click', () => this.carregarPontos());
-        
+
         // Formulário
         document.getElementById('formPonto').addEventListener('submit', (e) => this.salvarPonto(e));
-        
+
         // Modal
         document.getElementById('modalPonto').addEventListener('hidden.bs.modal', () => this.limparFormulario());
-        
+        // NOVO: Adiciona um event listener para renderizar o mapa corretamente ao abrir o modal
+        document.getElementById('modalPonto').addEventListener('shown.bs.modal', () => {
+            if (this.miniMapa) {
+                this.miniMapa.invalidateSize();
+                // Se estiver editando, atualiza o marker após a renderização
+                if (this.editando && this.pontoSelecionado) {
+                    this.atualizarMiniMapa();
+                }
+            }
+        });
+
         // Confirmação de exclusão
         document.getElementById('btnConfirmarExclusao').addEventListener('click', () => this.confirmarExclusao());
-        
+
         // Inputs de coordenadas
         document.getElementById('inputLatitude').addEventListener('input', () => this.atualizarMiniMapa());
         document.getElementById('inputLongitude').addEventListener('input', () => this.atualizarMiniMapa());
@@ -58,19 +68,17 @@ class PontoController {
         }).addTo(this.mapa);
 
         // Mini mapa do modal
-        setTimeout(() => {
-            this.miniMapa = L.map('miniMapa').setView([-15.7801, -47.9292], 10);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(this.miniMapa);
+        this.miniMapa = L.map('miniMapa').setView([-15.7801, -47.9292], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(this.miniMapa);
 
-            // Click no mini mapa para definir localização
-            this.miniMapa.on('click', (e) => {
-                document.getElementById('inputLatitude').value = e.latlng.lat.toFixed(6);
-                document.getElementById('inputLongitude').value = e.latlng.lng.toFixed(6);
-                this.atualizarMiniMapa();
-            });
-        }, 500);
+        // Click no mini mapa para definir localização
+        this.miniMapa.on('click', (e) => {
+            document.getElementById('inputLatitude').value = e.latlng.lat.toFixed(6);
+            document.getElementById('inputLongitude').value = e.latlng.lng.toFixed(6);
+            this.atualizarMiniMapa();
+        });
     }
 
     /**
@@ -97,7 +105,7 @@ class PontoController {
     renderizarListaPontos() {
         const container = document.getElementById('listaPontos');
         const nenhumPonto = document.getElementById('nenhumPonto');
-        
+
         if (this.pontos.length === 0) {
             container.innerHTML = '';
             nenhumPonto.style.display = 'block';
@@ -148,9 +156,9 @@ class PontoController {
             const marker = L.marker([lat, lng])
                 .bindPopup(this.createPopupContent(ponto))
                 .addTo(this.mapa);
-            
+
             this.markers.set(ponto._id, marker);
-            
+
             // Click no marker
             marker.on('click', () => this.selecionarPonto(ponto._id));
         });
@@ -190,18 +198,18 @@ class PontoController {
     selecionarPonto(id) {
         // Remove seleção anterior
         document.querySelectorAll('.ponto-item').forEach(item => item.classList.remove('active'));
-        
+
         // Seleciona novo ponto
         const elemento = document.querySelector(`[data-id="${id}"]`);
         if (elemento) {
             elemento.classList.add('active');
             this.pontoSelecionado = this.pontos.find(p => p._id === id);
-            
+
             // Centraliza no mapa
             if (this.pontoSelecionado) {
                 const [lat, lng] = this.pontoSelecionado.getLatLng();
                 this.mapa.setView([lat, lng], 15);
-                
+
                 // Abre popup
                 const marker = this.markers.get(id);
                 if (marker) {
@@ -216,18 +224,12 @@ class PontoController {
      */
     abrirModalNovoPonto() {
         this.editando = false;
+        this.pontoSelecionado = null; // Garante que não há ponto selecionado
         document.getElementById('modalTitle').textContent = 'Novo Ponto';
         this.limparFormulario();
-        
+
         const modal = new bootstrap.Modal(document.getElementById('modalPonto'));
         modal.show();
-        
-        // Inicializa mini mapa quando modal abrir
-        setTimeout(() => {
-            if (this.miniMapa) {
-                this.miniMapa.invalidateSize();
-            }
-        }, 300);
     }
 
     /**
@@ -239,29 +241,21 @@ class PontoController {
 
         this.editando = true;
         this.pontoSelecionado = ponto;
-        
+
         document.getElementById('modalTitle').textContent = 'Editar Ponto';
-        
+
         // Preenche formulário
         document.getElementById('inputNome').value = ponto.nome;
         document.getElementById('inputTipo').value = ponto.tipo;
         document.getElementById('inputDescricao').value = ponto.descricao || '';
         document.getElementById('inputEndereco').value = ponto.endereco || '';
-        
+
         const [lat, lng] = ponto.getLatLng();
         document.getElementById('inputLatitude').value = lat;
         document.getElementById('inputLongitude').value = lng;
-        
+
         const modal = new bootstrap.Modal(document.getElementById('modalPonto'));
         modal.show();
-        
-        // Atualiza mini mapa
-        setTimeout(() => {
-            if (this.miniMapa) {
-                this.miniMapa.invalidateSize();
-                this.atualizarMiniMapa();
-            }
-        }, 300);
     }
 
     /**
@@ -269,9 +263,8 @@ class PontoController {
      */
     async salvarPonto(e) {
         e.preventDefault();
-        
+
         try {
-            const formData = new FormData(e.target);
             const dados = {
                 nome: document.getElementById('inputNome').value.trim(),
                 tipo: document.getElementById('inputTipo').value,
@@ -287,7 +280,13 @@ class PontoController {
             };
 
             const ponto = new Ponto(dados);
-            
+            const validation = ponto.validate();
+
+            if (!validation.valid) {
+                this.showAlert(`Dados inválidos: ${validation.errors.join(', ')}`, 'danger');
+                return;
+            }
+
             let resultado;
             if (this.editando && this.pontoSelecionado) {
                 resultado = await pontoService.atualizarPonto(this.pontoSelecionado._id, ponto);
@@ -300,10 +299,10 @@ class PontoController {
             // Fecha modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalPonto'));
             modal.hide();
-            
+
             // Recarrega lista
             await this.carregarPontos();
-            
+
         } catch (error) {
             console.error('Erro ao salvar ponto:', error);
             this.showAlert('Erro ao salvar ponto: ' + error.message, 'danger');
@@ -319,7 +318,7 @@ class PontoController {
 
         this.pontoSelecionado = ponto;
         document.getElementById('nomeExclusao').textContent = ponto.nome;
-        
+
         const modal = new bootstrap.Modal(document.getElementById('modalConfirmarExclusao'));
         modal.show();
     }
@@ -332,16 +331,16 @@ class PontoController {
 
         try {
             await pontoService.deletarPonto(this.pontoSelecionado._id);
-            
+
             // Fecha modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarExclusao'));
             modal.hide();
-            
+
             this.showAlert('Ponto excluído com sucesso!', 'success');
-            
+
             // Recarrega lista
             await this.carregarPontos();
-            
+
         } catch (error) {
             console.error('Erro ao excluir ponto:', error);
             this.showAlert('Erro ao excluir ponto: ' + error.message, 'danger');
@@ -354,7 +353,7 @@ class PontoController {
     atualizarMiniMapa() {
         const lat = parseFloat(document.getElementById('inputLatitude').value);
         const lng = parseFloat(document.getElementById('inputLongitude').value);
-        
+
         if (!isNaN(lat) && !isNaN(lng) && this.miniMapa) {
             // Remove marker anterior
             this.miniMapa.eachLayer(layer => {
@@ -362,7 +361,7 @@ class PontoController {
                     this.miniMapa.removeLayer(layer);
                 }
             });
-            
+
             // Adiciona novo marker
             L.marker([lat, lng]).addTo(this.miniMapa);
             this.miniMapa.setView([lat, lng], 15);
@@ -376,7 +375,7 @@ class PontoController {
         document.getElementById('formPonto').reset();
         document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
         document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
-        
+
         // Limpa mini mapa
         if (this.miniMapa) {
             this.miniMapa.eachLayer(layer => {
@@ -393,7 +392,7 @@ class PontoController {
     showLoading(show) {
         const loading = document.getElementById('loadingPontos');
         const lista = document.getElementById('listaPontos');
-        
+
         if (show) {
             loading.style.display = 'block';
             lista.style.display = 'none';
@@ -409,16 +408,16 @@ class PontoController {
     showAlert(message, type = 'info') {
         const alertContainer = document.getElementById('alertContainer');
         const alertId = 'alert-' + Date.now();
-        
+
         const alertHTML = `
             <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         `;
-        
+
         alertContainer.insertAdjacentHTML('beforeend', alertHTML);
-        
+
         // Remove automaticamente após 5 segundos
         setTimeout(() => {
             const alert = document.getElementById(alertId);
@@ -443,7 +442,7 @@ class PontoController {
             'Supermercado': 'fas fa-shopping-cart',
             'Outro': 'fas fa-map-marker-alt'
         };
-        
+
         return `<i class="${icons[tipo] || icons['Outro']}"></i>`;
     }
 }
