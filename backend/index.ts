@@ -1,29 +1,45 @@
-import express from 'express';
-import { conectarMongoDB } from './database/mongodb';
-import { conectarPostgres } from './database/postgres';
-import pontosRoutes from './routes/routes';
+import express, { Request, Response } from 'express';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+
+import pontoRoutes from './routes/routes.js';
+import { conectarMongoDB } from './database/mongodb.js';
+import { conectarPostgres } from './database/postgres.js';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT: number = parseInt(process.env.PORT || '3000', 10);
 
+// Emular __dirname com ES Modules para garantir o caminho correto
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Middlewares
+app.use(cors());
 app.use(express.json());
-app.use('/api', pontosRoutes);
 
+const frontendPath = path.join(__dirname, '../frontend');
+app.use(express.static(frontendPath));
+
+// Rotas da API
+app.use('/api', pontoRoutes);
+app.get('/', (req: Request, res: Response) => {
+  res.sendFile(path.join(frontendPath, 'views', 'index.html'));
+});
+
+
+// Inicia o servidor e conecta a todos os bancos de dados.
 async function iniciarServidor() {
   try {
-    // Conectando todos os bancos de dados
     await conectarMongoDB();
     await conectarPostgres();
 
-    app.get('/', (req, res) => {
-      res.send('Servidor rodando e conectado a todos os bancos de dados.');
-    });
-
     app.listen(PORT, () => {
-      console.log(`🚀 Servidor iniciado na porta ${PORT}`);
+      console.log(`🚀 Servidor rodando na porta ${PORT}`);
+      console.log(`Front-end sendo servido a partir de: ${frontendPath}`);
     });
   } catch (error) {
     console.error('❌ Falha ao iniciar o servidor:', error);
