@@ -97,7 +97,7 @@
                     <div class="card-header">
                         <h5 class="mb-0">
                             <i class="fas fa-map me-2"></i>
-                            Mapa Geral
+                            Mapa
                         </h5>
                     </div>
                     <div class="card-body p-0">
@@ -132,14 +132,11 @@
                                     <label for="inputTipo" class="form-label">Tipo *</label>
                                     <select class="form-select" id="inputTipo" required>
                                         <option value="">Selecione um tipo</option>
-                                        <option value="Restaurante">Restaurante</option>
-                                        <option value="Hospital">Hospital</option>
-                                        <option value="Escola">Escola</option>
-                                        <option value="Posto de Gasolina">Posto de Gasolina</option>
-                                        <option value="Banco">Banco</option>
-                                        <option value="Farmácia">Farmácia</option>
-                                        <option value="Supermercado">Supermercado</option>
-                                        <option value="Outro">Outro</option>
+                                        <option value="Roupas e Acessórios">Roupas e Acessórios</option>
+                                        <option value="Casa e Decoração">Casa e Decoração</option>
+                                        <option value="Cultura">Cultura</option>
+                                        <option value="Alimentos">Alimentos</option>
+                                        <option value="Outros">Outros</option>
                                     </select>
                                 </div>
                                 
@@ -200,6 +197,94 @@
         </div>
     </div>
 
+        <div class="modal fade" id="modalPonto" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        <span id="modalTitle">Novo Ponto</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formPonto">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="inputNome" class="form-label">Nome *</label>
+                                    <input type="text" class="form-control" id="inputNome" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="inputTipo" class="form-label">Tipo *</label>
+                                    <select class="form-select" id="inputTipo" required>
+                                        <option value="">Selecione um tipo</option>
+                                        <option value="Roupas e Acessórios">Roupas e Acessórios</option>
+                                        <option value="Casa e Decoração">Casa e Decoração</option>
+                                        <option value="Cultura">Cultura</option>
+                                        <option value="Alimentos">Alimentos</option>
+                                        <option value="Outros">Outros</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="inputEndereco" class="form-label">Endereço</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="inputEndereco" placeholder="Digite um endereço para buscar">
+                                        <button class="btn btn-outline-secondary" type="button" id="btnBuscarEndereco">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                    <div id="resultadosBusca" class="dropdown-menu w-100" style="max-height: 200px; overflow-y: auto;"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="inputDescricao" class="form-label">Descrição</label>
+                                    <textarea class="form-control" id="inputDescricao" rows="3"></textarea>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Localização *</label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <input type="number" class="form-control" id="inputLatitude" 
+                                                   placeholder="Latitude" step="any" required>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" class="form-control" id="inputLongitude" 
+                                                   placeholder="Longitude" step="any" required>
+                                        </div>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        Clique no mapa para definir a localização
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mini mapa para seleção de localização -->
+                        <div class="mb-3">
+                            <label class="form-label">Selecione no mapa:</label>
+                            <div id="miniMapa" style="height: 300px; width: 100%;"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>
+                            Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
     <!-- Modal de confirmação de exclusão -->
     <div class="modal fade" id="modalConfirmarExclusao" tabindex="-1">
         <div class="modal-dialog">
