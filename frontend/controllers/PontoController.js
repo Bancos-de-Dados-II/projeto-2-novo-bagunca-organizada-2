@@ -82,16 +82,16 @@ class PontoController {
      * Inicializa os mapas
      */
     initMapa() {
-        // Mapa principal - inicia no centro do Brasil
+        // Mapa principal - inicia no centro do Brasil temporariamente
         this.mapa = L.map('mapa').setView([-15.7801, -47.9292], 4);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(this.mapa);
 
-        // Tenta obter localização do usuário
+        // Tenta obter localização do usuário imediatamente
         this.obterLocalizacaoUsuario();
 
-        // Mini mapa do modal
+        // Mini mapa do modal - também será centralizado na localização do usuário
         this.miniMapa = L.map('miniMapa').setView([-15.7801, -47.9292], 10);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
@@ -110,40 +110,123 @@ class PontoController {
      */
     obterLocalizacaoUsuario() {
         if (navigator.geolocation) {
+            // Mostra feedback visual que está obtendo localização
+            this.showAlert('📍 Obtendo sua localização...', 'info');
+            
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     
-                    // Centraliza o mapa na localização do usuário
-                    this.mapa.setView([lat, lng], 13);
+                    // Armazena localização do usuário para uso posterior
+                    this.localizacaoUsuario = { lat, lng };
                     
-                    // Adiciona marker da localização atual
+                    // Centraliza o mapa na localização do usuário com zoom adequado
+                    this.mapa.setView([lat, lng], 15);
+                    
+                    // Adiciona marker da localização atual com ícone personalizado
                     const userIcon = L.divIcon({
-                        html: '<i class="fas fa-user-circle text-primary" style="font-size: 24px;"></i>',
-                        iconSize: [24, 24],
+                        html: '<i class="fas fa-user-circle text-primary" style="font-size: 28px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);"></i>',
+                        iconSize: [28, 28],
                         className: 'user-location-marker'
                     });
                     
-                    L.marker([lat, lng], { icon: userIcon })
+                    this.userLocationMarker = L.marker([lat, lng], { icon: userIcon })
                         .addTo(this.mapa)
-                        .bindPopup('<b>Sua localização atual</b>')
+                        .bindPopup(`
+                            <div class="text-center">
+                                <i class="fas fa-location-arrow text-primary mb-2"></i>
+                                <br><b>Sua localização atual</b>
+                                <br><small class="text-muted">${lat.toFixed(6)}, ${lng.toFixed(6)}</small>
+                                <br><button class="btn btn-sm btn-primary mt-2" onclick="pontoController.centralizarNaLocalizacaoUsuario()">
+                                    <i class="fas fa-crosshairs me-1"></i>Centralizar aqui
+                                </button>
+                            </div>
+                        `)
                         .openPopup();
+                    
+                    // Também centraliza o mini mapa na localização do usuário
+                    this.miniMapa.setView([lat, lng], 15);
                         
                     console.log('✅ Localização do usuário obtida:', lat, lng);
+                    this.showAlert('✅ Localização obtida com sucesso!', 'success');
                 },
                 (error) => {
-                    console.warn('⚠️ Não foi possível obter localização:', error.message);
+                    let errorMessage = 'Não foi possível obter sua localização';
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Permissão de localização negada. Por favor, permita o acesso à localização para uma melhor experiência.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Localização indisponível no momento.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Timeout ao obter localização. Tente novamente.';
+                            break;
+                    }
+                    
+                    console.warn('⚠️ Erro de geolocalização:', error.message);
+                    this.showAlert(`⚠️ ${errorMessage}`, 'warning');
                     // Mantém o centro padrão do Brasil
                 },
                 {
                     enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 600000 // 10 minutos
+                    timeout: 15000, // Aumentado para 15 segundos
+                    maximumAge: 300000 // 5 minutos (reduzido para ser mais atual)
                 }
             );
         } else {
             console.warn('⚠️ Geolocalização não suportada pelo navegador');
+            this.showAlert('⚠️ Seu navegador não suporta geolocalização', 'warning');
+        }
+    }
+
+    /**
+     * Centraliza o mapa na localização do usuário
+     */
+    centralizarNaLocalizacaoUsuario() {
+        if (this.localizacaoUsuario) {
+            this.mapa.setView([this.localizacaoUsuario.lat, this.localizacaoUsuario.lng], 15);
+            if (this.userLocationMarker) {
+                this.userLocationMarker.openPopup();
+            }
+        } else {
+            this.showAlert('📍 Obtendo localização novamente...', 'info');
+            this.obterLocalizacaoUsuario();
+        }
+    }
+
+    /**
+     * Usa localização atual para novo ponto
+     */
+    usarMinhaLocalizacao() {
+        if (this.localizacaoUsuario) {
+            document.getElementById('inputLatitude').value = this.localizacaoUsuario.lat.toFixed(6);
+            document.getElementById('inputLongitude').value = this.localizacaoUsuario.lng.toFixed(6);
+            this.atualizarMiniMapa();
+            this.showAlert('✅ Localização atual aplicada!', 'success');
+        } else {
+            this.showAlert('📍 Obtendo sua localização...', 'info');
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    this.localizacaoUsuario = { lat, lng };
+                    
+                    document.getElementById('inputLatitude').value = lat.toFixed(6);
+                    document.getElementById('inputLongitude').value = lng.toFixed(6);
+                    this.atualizarMiniMapa();
+                    this.showAlert('✅ Localização atual aplicada!', 'success');
+                },
+                (error) => {
+                    this.showAlert('⚠️ Não foi possível obter sua localização', 'warning');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 300000
+                }
+            );
         }
     }
 
