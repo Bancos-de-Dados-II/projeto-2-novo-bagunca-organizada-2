@@ -39,11 +39,9 @@ class PontoController {
 
         // Modal
         document.getElementById('modalPonto').addEventListener('hidden.bs.modal', () => this.limparFormulario());
-        // NOVO: Adiciona um event listener para renderizar o mapa corretamente ao abrir o modal
         document.getElementById('modalPonto').addEventListener('shown.bs.modal', () => {
             if (this.miniMapa) {
                 this.miniMapa.invalidateSize();
-                // Se estiver editando, atualiza o marker após a renderização
                 if (this.editando && this.pontoSelecionado) {
                     this.atualizarMiniMapa();
                 }
@@ -81,22 +79,18 @@ class PontoController {
      * Inicializa os mapas
      */
     initMapa() {
-        // Mapa principal - inicia no centro do Brasil
         this.mapa = L.map('mapa').setView([-15.7801, -47.9292], 4);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(this.mapa);
 
-        // Tenta obter localização do usuário
         this.obterLocalizacaoUsuario();
 
-        // Mini mapa do modal
         this.miniMapa = L.map('miniMapa').setView([-15.7801, -47.9292], 10);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(this.miniMapa);
 
-        // Click no mini mapa para definir localização
         this.miniMapa.on('click', (e) => {
             document.getElementById('inputLatitude').value = e.latlng.lat.toFixed(6);
             document.getElementById('inputLongitude').value = e.latlng.lng.toFixed(6);
@@ -114,10 +108,8 @@ class PontoController {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     
-                    // Centraliza o mapa na localização do usuário
                     this.mapa.setView([lat, lng], 13);
                     
-                    // Adiciona marker da localização atual
                     const userIcon = L.divIcon({
                         html: '<i class="fas fa-user-circle text-primary" style="font-size: 24px;"></i>',
                         iconSize: [24, 24],
@@ -133,12 +125,11 @@ class PontoController {
                 },
                 (error) => {
                     console.warn('⚠️ Não foi possível obter localização:', error.message);
-                    // Mantém o centro padrão do Brasil
                 },
                 {
                     enableHighAccuracy: true,
                     timeout: 10000,
-                    maximumAge: 600000 // 10 minutos
+                    maximumAge: 600000
                 }
             );
         } else {
@@ -159,11 +150,9 @@ class PontoController {
         const resultadosContainer = document.getElementById('resultadosBusca');
         
         try {
-            // Mostra loading
             resultadosContainer.innerHTML = '<div class="dropdown-item text-center"><i class="fas fa-spinner fa-spin"></i> Buscando...</div>';
             resultadosContainer.style.display = 'block';
 
-            // Consulta Nominatim
             const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}&limit=5&addressdetails=1&countrycodes=br`);
             const resultados = await response.json();
 
@@ -172,7 +161,6 @@ class PontoController {
                 return;
             }
 
-            // Renderiza resultados
             resultadosContainer.innerHTML = resultados.map(resultado => `
                 <button type="button" class="dropdown-item endereco-resultado" 
                         data-lat="${resultado.lat}" 
@@ -186,22 +174,18 @@ class PontoController {
                 </button>
             `).join('');
 
-            // Adiciona event listeners aos resultados
             resultadosContainer.querySelectorAll('.endereco-resultado').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const lat = parseFloat(btn.dataset.lat);
                     const lng = parseFloat(btn.dataset.lng);
                     const enderecoCompleto = btn.dataset.endereco;
 
-                    // Atualiza campos
                     document.getElementById('inputLatitude').value = lat.toFixed(6);
                     document.getElementById('inputLongitude').value = lng.toFixed(6);
                     document.getElementById('inputEndereco').value = enderecoCompleto;
 
-                    // Atualiza mini mapa
                     this.atualizarMiniMapa();
 
-                    // Esconde resultados
                     resultadosContainer.style.display = 'none';
                 });
             });
@@ -219,7 +203,6 @@ class PontoController {
         const query = document.getElementById('inputBusca').value.trim();
         
         if (!query) {
-            // Se não há query, carrega todos os pontos
             await this.carregarPontos();
             return;
         }
@@ -323,11 +306,9 @@ class PontoController {
      * Renderiza os markers no mapa
      */
     renderizarMarkers() {
-        // Limpa markers existentes
         this.markers.forEach(marker => this.mapa.removeLayer(marker));
         this.markers.clear();
 
-        // Adiciona novos markers
         this.pontos.forEach(ponto => {
             const [lat, lng] = ponto.getLatLng();
             const marker = L.marker([lat, lng])
@@ -336,11 +317,9 @@ class PontoController {
 
             this.markers.set(ponto._id, marker);
 
-            // Click no marker
             marker.on('click', () => this.selecionarPonto(ponto._id));
         });
 
-        // Ajusta o zoom para mostrar todos os pontos
         if (this.pontos.length > 0) {
             const group = new L.featureGroup(Array.from(this.markers.values()));
             this.mapa.fitBounds(group.getBounds().pad(0.1));
@@ -373,21 +352,17 @@ class PontoController {
      * Seleciona um ponto na lista e no mapa
      */
     selecionarPonto(id) {
-        // Remove seleção anterior
         document.querySelectorAll('.ponto-item').forEach(item => item.classList.remove('active'));
 
-        // Seleciona novo ponto
         const elemento = document.querySelector(`[data-id="${id}"]`);
         if (elemento) {
             elemento.classList.add('active');
             this.pontoSelecionado = this.pontos.find(p => p._id === id);
 
-            // Centraliza no mapa
             if (this.pontoSelecionado) {
                 const [lat, lng] = this.pontoSelecionado.getLatLng();
                 this.mapa.setView([lat, lng], 15);
 
-                // Abre popup
                 const marker = this.markers.get(id);
                 if (marker) {
                     marker.openPopup();
@@ -401,7 +376,7 @@ class PontoController {
      */
     abrirModalNovoPonto() {
         this.editando = false;
-        this.pontoSelecionado = null; // Garante que não há ponto selecionado
+        this.pontoSelecionado = null;
         document.getElementById('modalTitle').textContent = 'Novo Ponto';
         this.limparFormulario();
 
@@ -421,7 +396,6 @@ class PontoController {
 
         document.getElementById('modalTitle').textContent = 'Editar Ponto';
 
-        // Preenche formulário
         document.getElementById('inputNome').value = ponto.nome;
         document.getElementById('inputTipo').value = ponto.tipo;
         document.getElementById('inputDescricao').value = ponto.descricao || '';
@@ -473,11 +447,9 @@ class PontoController {
                 this.showAlert('Ponto criado com sucesso!', 'success');
             }
 
-            // Fecha modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalPonto'));
             modal.hide();
 
-            // Recarrega lista
             await this.carregarPontos();
 
         } catch (error) {
@@ -509,13 +481,11 @@ class PontoController {
         try {
             await pontoService.deletarPonto(this.pontoSelecionado._id);
 
-            // Fecha modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarExclusao'));
             modal.hide();
 
             this.showAlert('Ponto excluído com sucesso!', 'success');
 
-            // Recarrega lista
             await this.carregarPontos();
 
         } catch (error) {
@@ -532,14 +502,12 @@ class PontoController {
         const lng = parseFloat(document.getElementById('inputLongitude').value);
 
         if (!isNaN(lat) && !isNaN(lng) && this.miniMapa) {
-            // Remove marker anterior
             this.miniMapa.eachLayer(layer => {
                 if (layer instanceof L.Marker) {
                     this.miniMapa.removeLayer(layer);
                 }
             });
 
-            // Adiciona novo marker
             L.marker([lat, lng]).addTo(this.miniMapa);
             this.miniMapa.setView([lat, lng], 15);
         }
@@ -553,7 +521,6 @@ class PontoController {
         document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
         document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
 
-        // Limpa mini mapa
         if (this.miniMapa) {
             this.miniMapa.eachLayer(layer => {
                 if (layer instanceof L.Marker) {
@@ -580,7 +547,7 @@ class PontoController {
     }
 
     /**
-     * Exibe alerta
+     * Exibe alerta com tempo
      */
     showAlert(message, type = 'info') {
         const alertContainer = document.getElementById('alertContainer');
@@ -595,14 +562,12 @@ class PontoController {
 
         alertContainer.insertAdjacentHTML('beforeend', alertHTML);
 
-        // Remove automaticamente após 5 segundos
         setTimeout(() => {
-            const alert = document.getElementById(alertId);
-            if (alert) {
-                const bsAlert = bootstrap.Alert.getInstance(alert);
-                if (bsAlert) bsAlert.close();
+            const alertElement = document.getElementById(alertId);
+            if (alertElement) {
+                alertElement.remove();
             }
-        }, 5000);
+        }, 3000);
     }
 
     /**
@@ -646,21 +611,16 @@ class PontoController {
 
             const { pontosPorTipo, pontosPorMes, distribuicaoGeografica, totalPontos, pontosRecentes } = resultado.data;
 
-            // Atualiza cards de estatísticas
             document.getElementById('totalPontos').textContent = totalPontos;
             document.getElementById('tipoMaisComum').textContent = pontosPorTipo[0]?.total ? `${pontosPorTipo[0]._id} (${pontosPorTipo[0].total})` : 'N/A';
             document.getElementById('regiaoMaior').textContent = distribuicaoGeografica[0]?.total ? `${distribuicaoGeografica[0]._id} (${distribuicaoGeografica[0].total})` : 'N/A';
             
-            // Crescimento do mês atual
             const mesAtual = new Date().getMonth() + 1;
             const anoAtual = new Date().getFullYear();
             const crescimentoMesAtual = pontosPorMes.find(item => item._id.mes === mesAtual && item._id.ano === anoAtual);
             document.getElementById('crescimentoMes').textContent = crescimentoMesAtual?.total || 0;
 
-            // Renderiza gráficos
             this.renderizarGraficos(pontosPorTipo, distribuicaoGeografica, pontosPorMes);
-
-            // Renderiza pontos recentes
             this.renderizarPontosRecentes(pontosRecentes);
 
         } catch (error) {
@@ -673,7 +633,6 @@ class PontoController {
      * Renderiza os gráficos do dashboard
      */
     renderizarGraficos(pontosPorTipo, distribuicaoGeografica, pontosPorMes) {
-        // Destrói os gráficos anteriores para evitar o erro do canvas
         if (this.chartPorTipo) {
             this.chartPorTipo.destroy();
         }
@@ -684,9 +643,8 @@ class PontoController {
             this.chartCrescimento.destroy();
         }
 
-        // Gráfico por tipo (Pizza)
         const ctxTipo = document.getElementById('graficoPorTipo').getContext('2d');
-        this.chartPorTipo = new Chart(ctxTipo, { // Armazena a nova instância
+        this.chartPorTipo = new Chart(ctxTipo, {
             type: 'doughnut',
             data: {
                 labels: pontosPorTipo.map(item => item._id),
@@ -709,9 +667,8 @@ class PontoController {
             }
         });
 
-        // Gráfico geográfico (Barras)
         const ctxGeo = document.getElementById('graficoGeografico').getContext('2d');
-        this.chartGeografico = new Chart(ctxGeo, { // Armazena a nova instância
+        this.chartGeografico = new Chart(ctxGeo, {
             type: 'bar',
             data: {
                 labels: distribuicaoGeografica.map(item => item._id),
@@ -732,11 +689,10 @@ class PontoController {
             }
         });
 
-        // Gráfico de crescimento (Linha)
         const ctxCrescimento = document.getElementById('graficoCrescimento').getContext('2d');
         const mesesOrdenados = pontosPorMes.reverse();
         
-        this.chartCrescimento = new Chart(ctxCrescimento, { // Armazena a nova instância
+        this.chartCrescimento = new Chart(ctxCrescimento, {
             type: 'line',
             data: {
                 labels: mesesOrdenados.map(item => `${item._id.mes}/${item._id.ano}`),
@@ -785,8 +741,6 @@ class PontoController {
     }
 }
 
-// Inicializa a aplicação
 const pontoController = new PontoController();
 
-// Expõe globalmente para uso nos event handlers inline
 window.pontoController = pontoController;
