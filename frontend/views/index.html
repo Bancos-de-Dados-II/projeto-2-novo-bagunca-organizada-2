@@ -29,6 +29,10 @@
                   <img src="assets/images/logotipo.png" alt="Logo Re.Ciclo" height="70">
                 </a>
                 <div>
+                    <button class="btn btn-outline-light me-2" id="btnConhecaProjeto" data-bs-toggle="modal" data-bs-target="#modalSobreProjeto">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Conheça o Projeto
+                    </button>
                     <button class="btn btn-outline-light me-2" id="btnDashboard">
                         <i class="fas fa-chart-bar me-1"></i>
                         Dashboard
@@ -197,93 +201,6 @@
         </div>
     </div>
 
-        <div class="modal fade" id="modalPonto" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-map-marker-alt me-2"></i>
-                        <span id="modalTitle">Novo Ponto</span>
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form id="formPonto">
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="inputNome" class="form-label">Nome *</label>
-                                    <input type="text" class="form-control" id="inputNome" required>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="inputTipo" class="form-label">Tipo *</label>
-                                    <select class="form-select" id="inputTipo" required>
-                                        <option value="">Selecione um tipo</option>
-                                        <option value="Roupas e Acessórios">Roupas e Acessórios</option>
-                                        <option value="Casa e Decoração">Casa e Decoração</option>
-                                        <option value="Cultura">Cultura</option>
-                                        <option value="Alimentos">Alimentos</option>
-                                        <option value="Outros">Outros</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="inputEndereco" class="form-label">Endereço</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" id="inputEndereco" placeholder="Digite um endereço para buscar">
-                                        <button class="btn btn-outline-secondary" type="button" id="btnBuscarEndereco">
-                                            <i class="fas fa-search"></i>
-                                        </button>
-                                    </div>
-                                    <div id="resultadosBusca" class="dropdown-menu w-100" style="max-height: 200px; overflow-y: auto;"></div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="inputDescricao" class="form-label">Descrição</label>
-                                    <textarea class="form-control" id="inputDescricao" rows="3"></textarea>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label class="form-label">Localização *</label>
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <input type="number" class="form-control" id="inputLatitude" 
-                                                   placeholder="Latitude" step="any" required>
-                                        </div>
-                                        <div class="col-6">
-                                            <input type="number" class="form-control" id="inputLongitude" 
-                                                   placeholder="Longitude" step="any" required>
-                                        </div>
-                                    </div>
-                                    <small class="form-text text-muted">
-                                        Clique no mapa para definir a localização
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Mini mapa para seleção de localização -->
-                        <div class="mb-3">
-                            <label class="form-label">Selecione no mapa:</label>
-                            <div id="miniMapa" style="height: 300px; width: 100%;"></div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i>
-                            Salvar
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
     
     <!-- Modal de confirmação de exclusão -->
     <div class="modal fade" id="modalConfirmarExclusao" tabindex="-1">
@@ -422,6 +339,55 @@
                         Atualizar Dados
                     </button>
                 </div>
+                <div class="modal fade" id="modalSobreProjeto" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-recycle me-2"></i>
+                                    Conheça o Projeto Re.Ciclo
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="lead">Bem-vindo ao <strong>Re.Ciclo</strong>! Nossa plataforma conecta pessoas que desejam doar itens com aquelas que precisam, promovendo a solidariedade e a economia circular em nossa comunidade.</p>
+                                <p>O objetivo é simples: facilitar a criação de pontos de coleta e troca, onde cada doação encontra um novo lar e ajuda quem mais necessita. Acreditamos no poder da partilha para construir um futuro mais sustentável e solidário.</p>
+                                
+                                <hr class="my-4">
+
+                                <h4><i class="fas fa-gifts me-2 text-primary"></i>Tipos de Doações Aceitas</h4>
+                                <p>Para manter a organização e garantir que as doações sejam úteis, categorizamos os pontos de coleta da seguinte forma:</p>
+                                
+                                <div class="mt-3">
+                                    <h6><i class="fas fa-tshirt me-2"></i>Roupas e Acessórios</h6>
+                                    <p>Itens de vestuário em bom estado, como roupas, calçados, bolsas, cintos e outros acessórios que possam ser reutilizados.</p>
+                                    
+                                    <h6><i class="fas fa-couch me-2"></i>Casa e Decoração</h6>
+                                    <p>Utensílios de cozinha, eletrodomésticos de pequeno porte em funcionamento, móveis pequenos e objetos de decoração que possam equipar um novo lar.</p>
+                                    
+                                    <h6><i class="fas fa-book-open me-2"></i>Cultura</h6>
+                                    <p>Livros, brinquedos, jogos de tabuleiro, CDs e DVDs. Itens que promovem o lazer, a educação e a cultura.</p>
+                                    
+                                    <h6><i class="fas fa-utensils me-2"></i>Alimentos</h6>
+                                    <p>Pontos destinados a alimentos não perecíveis (arroz, feijão, macarrão, etc.). É fundamental que os produtos estejam lacrados e dentro do prazo de validade.</p>
+
+                                    <h6><i class="fas fa-box-open me-2"></i>Outros</h6>
+                                    <p>Uma categoria flexível para itens que não se encaixam nas demais, como ferramentas, materiais de artesanato ou outros objetos úteis.</p>
+                                </div>
+
+                                <div class="alert alert-info mt-4">
+                                    Sua doação faz a diferença! Junte-se a nós para construir uma comunidade mais forte e sustentável. 💚
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                                    Entendido!
+                                </button>
+                            </div>
+            </div>
+        </div>
+    </div>
             </div>
         </div>
     </div>
