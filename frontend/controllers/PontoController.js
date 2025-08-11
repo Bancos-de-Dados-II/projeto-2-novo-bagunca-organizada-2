@@ -567,26 +567,35 @@ class PontoController {
             if (alertElement) {
                 alertElement.remove();
             }
-        }, 3000);
+        }, 3000); 
     }
+
+    /**
+     * Retorna ícone para tipo de ponto
+     */
+    // ... Outros métodos ...
 
     /**
      * Retorna ícone para tipo de ponto
      */
     getTipoIcon(tipo) {
         const icons = {
-            'Restaurante': 'fas fa-utensils',
-            'Hospital': 'fas fa-hospital',
-            'Escola': 'fas fa-school',
-            'Posto de Gasolina': 'fas fa-gas-pump',
-            'Banco': 'fas fa-university',
-            'Farmácia': 'fas fa-pills',
-            'Supermercado': 'fas fa-shopping-cart',
-            'Outro': 'fas fa-map-marker-alt'
+            'Roupas e Acessórios': 'fas fa-tshirt',
+            'Casa e Decoração': 'fas fa-couch',
+            'Cultura': 'fas fa-book-open',
+            'Alimentos': 'fas fa-utensils',
+            'Outros': 'fas fa-box-open'
         };
+        
+        // O nome da classe no CSS deve ser o tipo em minúsculas e com traços
+        const className = `tipo-${tipo.toLowerCase().replace(/\s+/g, '-')}`;
+        const iconClass = icons[tipo] || icons['Outros'];
 
-        return `<i class="${icons[tipo] || icons['Outro']}"></i>`;
+        // O retorno da função cria a tag <span> com a classe específica para a cor e o ícone
+        return `<i class="${iconClass}"></i>`;
     }
+
+// ... Restante do código JavaScript ...
 
     /**
      * Abre modal do dashboard

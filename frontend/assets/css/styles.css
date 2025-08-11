@@ -159,6 +159,13 @@ body {
     padding: 0.75rem 1rem;
 }
 
+#alertContainer {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 1050;
+}
+
 /* Botões */
 .btn {
     border-radius: 0.375rem;
@@ -228,6 +235,8 @@ body {
     animation: fadeIn 0.3s ease-in-out;
 }
 
+/* ... Outros estilos existentes ... */
+
 /* Ícones de tipo de ponto */
 .tipo-icon {
     width: 20px;
@@ -240,29 +249,11 @@ body {
     font-size: 0.75rem;
 }
 
-.tipo-restaurante { background-color: #ff6b6b; color: white; }
-.tipo-hospital { background-color: #ff4757; color: white; }
-.tipo-escola { background-color: #3742fa; color: white; }
-.tipo-posto { background-color: #ffa502; color: white; }
-.tipo-banco { background-color: #2ed573; color: white; }
-.tipo-farmacia { background-color: #1e90ff; color: white; }
-.tipo-supermercado { background-color: #ff6348; color: white; }
-.tipo-outro { background-color: var(--secondary-color); color: white; }
+/* Novas classes para os tipos do Re.Ciclo */
+.tipo-roupas-e-acessorios { background-color: #007bff; color: white; }
+.tipo-casa-e-decoracao { background-color: #28a745; color: white; }
+.tipo-cultura { background-color: #fd7e14; color: white; }
+.tipo-alimentos { background-color: #ffc107; color: white; }
+.tipo-outros { background-color: #6c757d; color: white; }
 
-/* Scrollbar customizada */
-.list-group::-webkit-scrollbar {
-    width: 6px;
-}
-
-.list-group::-webkit-scrollbar-track {
-    background: var(--light-color);
-}
-
-.list-group::-webkit-scrollbar-thumb {
-    background: var(--secondary-color);
-    border-radius: 3px;
-}
-
-.list-group::-webkit-scrollbar-thumb:hover {
-    background: var(--dark-color);
-}
+/* ... Restante do código CSS ... */
