@@ -6,12 +6,11 @@ import pontoService from '../services/PontoService.js';
  */
 class PontoController {
     constructor() {
-        this.pontos = [];
-        this.pontoSelecionado = null;
-        this.mapa = null;
-        this.miniMapa = null;
         this.markers = new Map();
         this.editando = false;
+        this.chartPorTipo = null;
+        this.chartGeografico = null;
+        this.chartCrescimento = null;
 
         this.init();
     }
@@ -670,13 +669,24 @@ class PontoController {
         }
     }
 
-    /**
+/**
      * Renderiza os gráficos do dashboard
      */
     renderizarGraficos(pontosPorTipo, distribuicaoGeografica, pontosPorMes) {
+        // Destrói os gráficos anteriores para evitar o erro do canvas
+        if (this.chartPorTipo) {
+            this.chartPorTipo.destroy();
+        }
+        if (this.chartGeografico) {
+            this.chartGeografico.destroy();
+        }
+        if (this.chartCrescimento) {
+            this.chartCrescimento.destroy();
+        }
+
         // Gráfico por tipo (Pizza)
         const ctxTipo = document.getElementById('graficoPorTipo').getContext('2d');
-        new Chart(ctxTipo, {
+        this.chartPorTipo = new Chart(ctxTipo, { // Armazena a nova instância
             type: 'doughnut',
             data: {
                 labels: pontosPorTipo.map(item => item._id),
@@ -701,7 +711,7 @@ class PontoController {
 
         // Gráfico geográfico (Barras)
         const ctxGeo = document.getElementById('graficoGeografico').getContext('2d');
-        new Chart(ctxGeo, {
+        this.chartGeografico = new Chart(ctxGeo, { // Armazena a nova instância
             type: 'bar',
             data: {
                 labels: distribuicaoGeografica.map(item => item._id),
@@ -724,9 +734,9 @@ class PontoController {
 
         // Gráfico de crescimento (Linha)
         const ctxCrescimento = document.getElementById('graficoCrescimento').getContext('2d');
-        const mesesOrdenados = pontosPorMes.reverse(); // Do mais antigo para o mais recente
+        const mesesOrdenados = pontosPorMes.reverse();
         
-        new Chart(ctxCrescimento, {
+        this.chartCrescimento = new Chart(ctxCrescimento, { // Armazena a nova instância
             type: 'line',
             data: {
                 labels: mesesOrdenados.map(item => `${item._id.mes}/${item._id.ano}`),
