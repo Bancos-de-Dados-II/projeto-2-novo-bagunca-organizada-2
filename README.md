@@ -1,4 +1,4 @@
-# 🗺️ Sistema de Pontos Georreferenciados
+# 🗺️ Sistema de Pontos Georreferenciados Re.Ciclo
 
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/-TpqR4IR)
 
@@ -30,7 +30,7 @@ Sistema completo para gerenciamento de pontos georreferenciados com interface we
 - **Dual Database** - MongoDB e PostgreSQL com PostGIS
 - **API REST** completa com validações
 - **Dashboard** com estatísticas e gráficos
-- **Sistema de notificações** em tempo real
+
 
 ### 🗺️ Recursos de Mapa
 - Mapa principal para visualização geral
@@ -357,19 +357,3 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para detalhes.
 - ✅ Dashboard com estatísticas
 - ✅ API REST completa
 - ✅ Documentação abrangente
-
-## 🔮 Roadmap
-
-### v1.1.0 (Próxima versão)
-- [ ] Autenticação de usuários
-- [ ] Filtros avançados de busca
-- [ ] Importação/exportação de dados
-- [ ] Notificações push
-- [ ] Modo offline (PWA)
-
-### v1.2.0 (Futuro)
-- [ ] Integração com GPS em tempo real
-- [ ] Relatórios avançados
-- [ ] API GraphQL
-- [ ] Testes automatizados
-- [ ] Monitoramento e métricas
