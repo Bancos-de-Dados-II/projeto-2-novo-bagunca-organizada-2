@@ -306,43 +306,50 @@ class PontoController {
      * Renderiza os markers no mapa
      */
     renderizarMarkers() {
-        this.markers.forEach(marker => this.mapa.removeLayer(marker));
-        this.markers.clear();
+    // Remove todos os marcadores existentes
+    this.markers.forEach(marker => this.mapa.removeLayer(marker));
+    this.markers.clear();
 
-        this.pontos.forEach(ponto => {
-            const [lat, lng] = ponto.getLatLng();
-            const marker = L.marker([lat, lng])
-                .bindPopup(this.createPopupContent(ponto))
-                .addTo(this.mapa);
+    // Adiciona novos marcadores para cada ponto
+    this.pontos.forEach(ponto => {
+        const [lat, lng] = ponto.getLatLng();
+        const customIcon = this.getCustomMapIcon(ponto.tipo);
 
-            this.markers.set(ponto._id, marker);
+        const marker = L.marker([lat, lng], { icon: customIcon })
+            .bindPopup(this.createPopupContent(ponto))
+            .addTo(this.mapa);
 
-            marker.on('click', () => this.selecionarPonto(ponto._id));
-        });
+        this.markers.set(ponto._id, marker);
+        marker.on('click', () => this.selecionarPonto(ponto._id));
+    });
 
-        if (this.pontos.length > 0) {
-            const group = new L.featureGroup(Array.from(this.markers.values()));
-            this.mapa.fitBounds(group.getBounds().pad(0.1));
-        }
+    // Ajusta o zoom para mostrar todos os pontos
+    if (this.pontos.length > 0) {
+        const group = new L.featureGroup(Array.from(this.markers.values()));
+        this.mapa.fitBounds(group.getBounds().pad(0.1));
     }
+}
 
-    /**
-     * Cria o conteúdo do popup do marker
-     */
-    createPopupContent(ponto) {
+
+createPopupContent(ponto) {
+        const iconClass = this.getTipoIcon(ponto.tipo);
+        const tipoClass = ponto.tipo.toLowerCase().replace(/\s+/g, '-');
         return `
             <div class="popup-content">
-                <h6>${ponto.nome}</h6>
-                <span class="badge bg-primary">${ponto.tipo}</span>
-                ${ponto.endereco ? `<p><i class="fas fa-map-marker-alt me-1"></i>${ponto.endereco}</p>` : ''}
-                ${ponto.descricao ? `<p>${ponto.descricao}</p>` : ''}
+                <div class="d-flex align-items-center mb-2">
+                    <span class="tipo-icon tipo-${tipoClass} me-2">
+                        <i class="${iconClass}"></i>
+                    </span>
+                    <h6 class="mb-0">${ponto.nome}</h6>
+                </div>
+                <div class="mb-2">
+                    <span class="badge bg-primary">${ponto.tipo}</span>
+                </div>
+                <p>${ponto.descricao || 'Sem descrição.'}</p>
+                <p class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>${ponto.endereco || 'Sem endereço.'}</p>
                 <div class="popup-actions">
-                    <button class="btn btn-sm btn-primary" onclick="pontoController.editarPonto('${ponto._id}')">
-                        <i class="fas fa-edit me-1"></i>Editar
-                    </button>
-                    <button class="btn btn-sm btn-danger" onclick="pontoController.confirmarExclusaoPonto('${ponto._id}')">
-                        <i class="fas fa-trash me-1"></i>Excluir
-                    </button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="pontoController.editarPonto('${ponto._id}')">Editar</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="pontoController.confirmarExclusaoPonto('${ponto._id}')">Excluir</button>
                 </div>
             </div>
         `;
@@ -570,32 +577,79 @@ class PontoController {
         }, 3000); 
     }
 
-    /**
-     * Retorna ícone para tipo de ponto
-     */
-    // ... Outros métodos ...
+/**
+ * Retorna a classe Font Awesome para o tipo de ponto
+ */
+getTipoIcon(tipo) {
+    const icons = {
+        'Roupas e Acessórios': 'fas fa-tshirt',
+        'Casa e Decoração': 'fas fa-couch',
+        'Cultura': 'fas fa-book-open',
+        'Alimentos': 'fas fa-utensils',
+        'Outros': 'fas fa-box-open'
+    };
+    return icons[tipo] || icons['Outros'];
+}
 
-    /**
-     * Retorna ícone para tipo de ponto
-     */
-    getTipoIcon(tipo) {
-        const icons = {
-            'Roupas e Acessórios': 'fas fa-tshirt',
-            'Casa e Decoração': 'fas fa-couch',
-            'Cultura': 'fas fa-book-open',
-            'Alimentos': 'fas fa-utensils',
-            'Outros': 'fas fa-box-open'
-        };
-        
-        // O nome da classe no CSS deve ser o tipo em minúsculas e com traços
-        const className = `tipo-${tipo.toLowerCase().replace(/\s+/g, '-')}`;
-        const iconClass = icons[tipo] || icons['Outros'];
+/**
+ * Cria um ícone customizado para o Leaflet com base no tipo
+ */
+getCustomMapIcon(tipo) {
+    const iconClass = this.getTipoIcon(tipo);
 
-        // O retorno da função cria a tag <span> com a classe específica para a cor e o ícone
-        return `<i class="${iconClass}"></i>`;
+    return L.divIcon({
+        className: 'custom-fa-icon',
+        html: `<i class="${iconClass}" style="font-size:20px; color:#007bff;"></i>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+    });
+}
+
+renderizarListaPontos() {
+    const container = document.getElementById('listaPontos');
+    const nenhumPonto = document.getElementById('nenhumPonto');
+
+    if (this.pontos.length === 0) {
+        container.innerHTML = '';
+        nenhumPonto.style.display = 'block';
+        return;
     }
 
-// ... Restante do código JavaScript ...
+    nenhumPonto.style.display = 'none';
+    container.innerHTML = this.pontos.map(ponto => {
+        const iconClass = this.getTipoIcon(ponto.tipo);
+        const tipoClass = ponto.tipo.toLowerCase().replace(/\s+/g, '-');
+        return `
+            <div class="list-group-item ponto-item fade-in" data-id="${ponto._id}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1" onclick="pontoController.selecionarPonto('${ponto._id}')">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="tipo-icon tipo-${tipoClass}">
+                                <i class="${iconClass}"></i>
+                            </span>
+                            <h6 class="mb-0">${ponto.nome}</h6>
+                        </div>
+                        <div class="mb-2">
+                            <span class="badge bg-primary">${ponto.tipo}</span>
+                        </div>
+                        ${ponto.endereco ? `<small class="text-muted d-block"><i class="fas fa-map-marker-alt me-1"></i>${ponto.endereco}</small>` : ''}
+                        ${ponto.descricao ? `<small class="text-muted d-block">${ponto.descricao.substring(0, 80)}${ponto.descricao.length > 80 ? '...' : ''}</small>` : ''}
+                    </div>
+                    <div class="ponto-actions">
+                        <button class="btn btn-sm btn-outline-primary" onclick="pontoController.editarPonto('${ponto._id}')" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="pontoController.confirmarExclusaoPonto('${ponto._id}')" title="Excluir">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
 
     /**
      * Abre modal do dashboard

@@ -1,6 +1,4 @@
-﻿/* Estilos customizados para o Sistema de Pontos Georreferenciados */
-
-:root {
+﻿:root {
     --primary-color: #50E3C2;
     --secondary-color: #6c757d;
     --success-color: #198754;
@@ -235,25 +233,88 @@ body {
     animation: fadeIn 0.3s ease-in-out;
 }
 
-/* ... Outros estilos existentes ... */
-
-/* Ícones de tipo de ponto */
-.tipo-icon {
-    width: 20px;
-    height: 20px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    margin-right: 0.5rem;
-    font-size: 0.75rem;
+/* Base dos ícones na lista e mapa */
+.tipo-icon,
+.leaflet-marker-icon.custom-fa-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  margin-right: 0.5rem;
+  width: 20px;
+  height: 20px;
 }
 
-/* Novas classes para os tipos do Re.Ciclo */
-.tipo-roupas-e-acessorios { background-color: #007bff; color: white; }
-.tipo-casa-e-decoracao { background-color: #28a745; color: white; }
-.tipo-cultura { background-color: #fd7e14; color: white; }
-.tipo-alimentos { background-color: #ffc107; color: white; }
-.tipo-outros { background-color: #6c757d; color: white; }
+/* Ícones do mapa maiores e com borda e sombra */
+.leaflet-marker-icon.custom-fa-icon {
+  width: 32px;
+  height: 32px;
+  font-size: 1rem;
+  border: 3px solid white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+  transform: translateY(-50%);
+}
 
-/* ... Restante do código CSS ... */
+/* Cores para os tipos na lista e no mapa */
+.tipo-roupas-e-acessorios,
+.leaflet-marker-icon.tipo-roupas-e-acessorios.custom-fa-icon {
+  background-color: #007bff;
+  color: black;
+}
+
+.tipo-casa-e-decoracao,
+.leaflet-marker-icon.tipo-casa-e-decoracao.custom-fa-icon {
+  background-color: #28a745;
+  color: black;
+}
+
+.tipo-cultura,
+.leaflet-marker-icon.tipo-cultura.custom-fa-icon {
+  background-color: #fd7e14;
+  color: black; /* texto preto para contraste */
+}
+
+.tipo-alimentos,
+.leaflet-marker-icon.tipo-alimentos.custom-fa-icon {
+  background-color: #ffc107;
+  color: black; /* texto preto para contraste */
+}
+
+.tipo-outros,
+.leaflet-marker-icon.tipo-outros.custom-fa-icon {
+  background-color: #6c757d;
+  color: black;
+}
+
+/* Remove fundo e borda padrão do Leaflet */
+.leaflet-marker-icon,
+.leaflet-div-icon {
+  background: none !important;
+  border: none !important;
+}
+
+/* Centraliza o ícone do Font Awesome no marcador */
+.custom-fa-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Scrollbar customizada */
+.list-group::-webkit-scrollbar {
+  width: 6px;
+}
+
+.list-group::-webkit-scrollbar-track {
+  background: #6c757d; /* cor clara */
+}
+
+.list-group::-webkit-scrollbar-thumb {
+  background: #6c757d; /* cinza escuro */
+  border-radius: 3px;
+}
+
+.list-group::-webkit-scrollbar-thumb:hover {
+  background: #343a40; /* cinza ainda mais escuro */
+}
