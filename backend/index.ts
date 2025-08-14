@@ -10,7 +10,7 @@ import { conectarPostgres } from './database/postgres';
 
 dotenv.config();
 
-const app = express();
+export const app = express();
 const PORT: number = parseInt(process.env.PORT || '3000', 10);
 
 // Emular __dirname com ES Modules para garantir o caminho correto
@@ -39,7 +39,6 @@ async function iniciarServidor() {
 
     app.listen(PORT, () => {
       console.log(`🚀 Servidor rodando na porta ${PORT}`);
-      console.log(`Front-end sendo servido a partir de: ${frontendPath}`);
     });
   } catch (error) {
     console.error('❌ Falha ao iniciar o servidor:', error);
@@ -47,4 +46,10 @@ async function iniciarServidor() {
   }
 }
 
-iniciarServidor();
+// Condição para iniciar o servidor apenas em ambiente de não-teste
+if (process.env.NODE_ENV !== 'test') {
+  iniciarServidor();
+}
+
+// A linha mais importante para os testes:
+export default app;
