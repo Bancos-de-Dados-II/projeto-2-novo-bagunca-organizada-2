@@ -10,37 +10,19 @@ services:
     volumes:
       - mongodb_data:/data/db
     restart: always
-  
-  # Serviço do PostgreSQL com PostGIS
-  postgres:
-    image: postgis/postgis:latest
-    container_name: postgres_container
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=postgres
-    restart: always
 
-  # Serviço do pgAdmin4
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: pgadmin_container
+  neo4j:
+    image: neo4j:latest
+    container_name: neo4j_container
     ports:
-      - "15432:80"
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=pedrocasa808080@gmail.com
-      - PGADMIN_DEFAULT_PASSWORD=postgres
+      - "7474:7474"
+      - "7687:7687"
     volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - postgres
+      - neo4j_data:/data
+    environment:
+      - NEO4J_AUTH=neo4j/password
     restart: always
 
 volumes:
   mongodb_data:
-  postgres_data:
-  pgadmin_data:
+  neo4j_data:
